@@ -1,0 +1,14 @@
+# Compiled / cached
+cache/
+
+# Editor files
+.vscode
+
+# Git
+.git*
+
+# Dev
+README.md
+benchmark/
+Makefile
+coverage.*

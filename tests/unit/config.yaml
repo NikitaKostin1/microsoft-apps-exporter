@@ -1,0 +1,15 @@
+sharepoint:
+  lists:
+    - site_id: site_id1
+      list_id: list_id1
+      table_name: table_name1
+      columns_map:
+        key1: val1
+        key2: val2
+        key3: val3
+        key4: val4
+    - site_id: site_id2
+      list_id: list_id2
+      table_name: table_name2
+      columns_map: 
+        key1: val1

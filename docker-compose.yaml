@@ -1,0 +1,55 @@
+networks:
+  internal_network:
+    name: network
+    driver: bridge
+
+services:
+
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: ./microsoft-apps-exporter.dockerfile
+    restart: no
+    ports: 
+      - "8080:1025"
+    deploy:
+      mode: replicated
+      replicas: 1
+    networks:
+      - internal_network
+
+  postgres:
+    container_name: postgres
+    image: 'postgres:14.2'
+    ports:
+      - "5432:5432"
+    restart: on-failure
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: users
+    volumes:
+      - ./cache/db-data/postgres/:/var/lib/postgresql/data/
+    networks:
+      - internal_network
+    profiles:
+      - dev
+
+  pgadmin:
+    container_name: pgadmin4
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin@mail.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - 8082:80
+    depends_on:
+      - postgres
+    networks:
+      - internal_network
+    profiles:
+      - dev

@@ -1,0 +1,12 @@
+# Compiled / cached
+cache/
+
+# Editor files
+.vscode
+
+# Dev
+/config.yaml
+README.md
+.env
+benchmark/
+coverage.*
