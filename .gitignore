@@ -6,7 +6,6 @@ cache/
 
 # Dev
 /config.yaml
-README.md
 .env
 benchmark/
 coverage.*
