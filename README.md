@@ -1,5 +1,7 @@
 # Microsoft Apps Exporter
 
+## The project is still being developed - the tests and deployments are to be introduced yet.
+
 ## Overview
 
 The Microsoft Apps Exporter project was initiated to address the need for a dynamic, scalable solution to export SharePoint list data to a production database without requiring manual intervention for each new list. This solution ensures efficient data handling, automation, and adaptability to evolving business needs.
