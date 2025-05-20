@@ -1,0 +1,51 @@
+image:
+  repository: <harbor host>/microsoft-apps-exporter
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+resources:
+  limits:
+    cpu: 400m
+    memory: 600Mi
+  requests:
+    cpu: 300m
+    memory: 500Mi
+
+service:
+  enabled: true
+  port: 8080
+  targetPort: 8080
+  type: ClusterIP
+
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure-pub
+  hosts:
+    - host: <host>
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: <name>
+      hosts:
+        - <host>
+
+configMapName: microsoft-apps-exporter-config
+dbSecretName: <secret manifest name>
+
+GRAPH_CLIENT_ID:
+GRAPH_TENANT_ID:
+GRAPH_APP_SCOPES: https://graph.microsoft.com/.default
+DB_PORT: 5432
+DB_HOST: 
+DB_NAME: db
+WEBHOOK_LISTEN_IP: 0.0.0.0
+WEBHOOK_LISTEN_PORT: 8080
+LOG_LEVEL: INFO
+GOOSE_DRIVER: postgres
+GOOSE_MIGRATION_DIR: ./migrations
+GOOSE_TABLE: microsoft_apps_exporter_migrations

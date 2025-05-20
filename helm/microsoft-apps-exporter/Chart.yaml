@@ -1,0 +1,4 @@
+apiVersion: v2
+name: microsoft-apps-exporter
+description: A Helm chart for deploying the Microsoft Apps Exporter
+version: 0.1.5
