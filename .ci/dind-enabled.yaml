@@ -1,0 +1,18 @@
+.dind-enabled:
+  services:
+    - name: <harbor>/docker-dind
+      alias: docker
+      variables:
+        DOCKER_HOST: unix:///var/run/docker-dind.sock
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "/certs/client"
+  before_script:
+    - |
+      for i in $(seq 1 30); do
+        docker info &>/dev/null && break
+        echo "Waiting for Docker to start..."
+        sleep 1
+      done

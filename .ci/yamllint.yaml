@@ -1,0 +1,12 @@
+---
+rules:
+  colons:
+    max-spaces-after: 1
+  comments:
+    require-starting-space: true
+  indentation:
+    spaces: 2
+    indent-sequences: true
+  key-duplicates: enable
+  new-line-at-end-of-file: enable
+  trailing-spaces: enable

@@ -1,0 +1,44 @@
+helm-package:
+  stage: helm
+  image: <harbor>/toolkit:stable
+  needs:
+    - charts-lint
+  script:
+    - helm package helm/$CHART_NAME -d helm/
+  artifacts:
+    paths:
+      - helm/*.tgz
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - helm/**/*
+    - if: $CI_MERGE_REQUEST_ID
+      changes:
+        - helm/**/*
+
+helm-push:
+  stage: helm
+  image: <harbor>/toolkit:stable
+  needs:
+    - helm-package
+  before_script:
+    - export HELM_VERSION="$(sed -n 's/^version:[[:space:]]*//p' helm/$CHART_NAME/Chart.yaml)"
+    - export HELM_PACKAGE="helm/$CHART_NAME-$HELM_VERSION.tgz"
+    - |
+      [ -e "$HELM_PACKAGE" ] \
+        || { echo "File to push \"$HELM_PACKAGE\" not found"; exit 1; }
+  script:
+    - |
+      helm registry login $HARBOR_HOST --username $HARBOR_LOGIN --password $HARBOR_PASSWORD
+      echo "==> Pushing $HELM_PACKAGE to oci://$HELM_REPO"
+      helm push $HELM_PACKAGE oci://$HELM_REPO
+  artifacts:
+    paths:
+      - helm/*.tgz
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - helm/**/*
+    - if: $CI_MERGE_REQUEST_ID
+      changes:
+        - helm/**/*

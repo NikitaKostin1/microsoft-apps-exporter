@@ -1,0 +1,63 @@
+unit_test:
+  stage: test
+  image: <harbor>/go-1.24:stable
+  script:
+    - go mod download
+    - go test ./tests/unit/... -v -count=1 -tags="testing unit"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - internal/**/*
+        - tests/unit/**/*
+        - resources.yaml
+        - go.mod
+        - go.sum
+      when: always
+    - if: $CI_MERGE_REQUEST_ID
+      changes:
+        - internal/**/*
+        - tests/unit/**/*
+        - resources.yaml
+        - go.mod
+        - go.sum
+    - when: never
+
+integration_test:
+  stage: test
+  image: <harbor>/go-1.24:stable
+  services:
+    - name: <harbor>/postgres:stable
+      alias: postgres
+      variables:
+        POSTGRES_DB: testing
+        POSTGRES_USER: user
+        POSTGRES_PASSWORD: password
+  variables:
+    DB_HOST: postgres
+    DB_PORT: "5432"
+    DB_NAME: testing
+    DB_USER: user
+    DB_PASSWORD: password
+    DB_CACHE_DIR: ./cache/.postgres/testingdata/
+  script:
+    - go mod download
+    - go test ./tests/integration/... -v -count=1 -tags="testing integration"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - internal/**/*
+        - tests/integration/**/*
+        - migrations/**
+        - resources.yaml
+        - go.mod
+        - go.sum
+      when: always
+    - if: $CI_MERGE_REQUEST_ID
+      changes:
+        - internal/**/*
+        - tests/integration/**/*
+        - migrations/**
+        - resources.yaml
+        - go.mod
+        - go.sum
+    - when: never

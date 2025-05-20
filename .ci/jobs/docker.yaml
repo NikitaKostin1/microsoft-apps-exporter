@@ -1,0 +1,103 @@
+docker-build-push:
+  stage: docker
+  image: <harbor>/docker-builder:stable
+  variables:
+    DOCKER_BUILDKIT: 1
+  extends:
+    - .dind-enabled
+  needs:
+    - job: unit_test
+      optional: true
+    - job: integration_test
+      optional: true
+  before_script:
+    - export COMMIT_TIMESTAMP_HASH=$(echo $CI_COMMIT_TIMESTAMP | sed 's/T.*//; s/-//g; s/\(....\)\(..\)/\1\2./')
+    - export IMAGE_VERSION=$(echo $COMMIT_TIMESTAMP_HASH.$CI_PIPELINE_ID+hash.$CI_COMMIT_SHORT_SHA | sed 's/+/-/')
+  script:
+    - |
+      echo "===> Docker is pulling cache..."
+      echo $HARBOR_PASSWORD | docker login $HARBOR_HOST -u $HARBOR_LOGIN --password-stdin
+      docker pull $IMAGE_REPO/$IMAGE_NAME:latest || true
+      docker pull $IMAGE_REPO/$IMAGE_NAME:stable || true
+
+      echo "===> Docker is building image..."
+      echo "===> Image: $IMAGE_REPO/$IMAGE_NAME"
+      echo "===> Tags: $IMAGE_VERSION | latest | stable"
+      docker build \
+        --cache-from $IMAGE_REPO/$IMAGE_NAME:latest \
+        --cache-from $IMAGE_REPO/$IMAGE_NAME:stable \
+        -t $IMAGE_REPO/$IMAGE_NAME:$IMAGE_VERSION \
+        -t $IMAGE_REPO/$IMAGE_NAME:latest \
+        -t $IMAGE_REPO/$IMAGE_NAME:stable \
+        .
+
+      docker push $IMAGE_REPO/$IMAGE_NAME:$IMAGE_VERSION
+      docker push $IMAGE_REPO/$IMAGE_NAME:latest
+      docker push $IMAGE_REPO/$IMAGE_NAME:stable
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - cmd/**
+        - internal/**/*
+        - resources.yaml
+        - entrypoint.sh
+        - migrations/**
+        - Dockerfile
+        - go.mod
+        - go.sum
+      when: always
+    - if: $CI_MERGE_REQUEST_ID
+      changes:
+        - cmd/**
+        - internal/**/*
+        - resources.yaml
+        - entrypoint.sh
+        - migrations/**
+        - Dockerfile
+        - go.mod
+        - go.sum
+      when: always
+    - when: never
+
+trivy-scan:
+  stage: docker
+  image: <harbor>/docker-builder:stable
+  extends:
+    - .dind-enabled
+  cache:
+    key: trivycache
+    paths:
+      - .trivycache/
+  needs:
+    - docker-build-push
+  before_script:
+    - export COMMIT_TIMESTAMP_HASH=$(echo $CI_COMMIT_TIMESTAMP | sed 's/T.*//; s/-//g; s/\(....\)\(..\)/\1\2./')
+    - export IMAGE_VERSION=$(echo $COMMIT_TIMESTAMP_HASH.$CI_PIPELINE_ID+hash.$CI_COMMIT_SHORT_SHA | sed 's/+/-/')
+  script:
+    - |
+      echo "===> Trivy is scanning image for vulnerabilities..."
+      echo "===> Image: $IMAGE_REPO/$IMAGE_NAME:$IMAGE_VERSION"
+      echo $HARBOR_PASSWORD | docker login $HARBOR_HOST -u $HARBOR_LOGIN --password-stdin
+      trivy image \
+        --cache-dir .trivycache \
+        --exit-code 1 \
+        --severity "HIGH,CRITICAL" \
+        --ignorefile .trivyignore \
+        --secret-config trivy-secrets.yaml \
+        --no-progress \
+        --format table \
+        $IMAGE_REPO/$IMAGE_NAME:$IMAGE_VERSION
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - Dockerfile
+        - go.mod
+        - go.sum
+      when: always
+    - if: $CI_MERGE_REQUEST_ID
+      changes:
+        - Dockerfile
+        - go.mod
+        - go.sum
+      when: always
+    - when: never

@@ -1,0 +1,21 @@
+stages:
+  - lint
+  - test
+  - docker
+  - helm
+
+variables:
+  IMAGE_REPO: 
+  IMAGE_NAME: microsoft-apps-exporter
+  CHART_NAME: microsoft-apps-exporter
+  HELM_REPO: 
+  HARBOR_HOST: 
+  GOMODCACHE: $CI_PROJECT_DIR/.cache/go/pkg/mod
+  GOCACHE: $CI_PROJECT_DIR/.cache/go/build
+
+include:
+  - .ci/dind-enabled.yaml
+  - .ci/jobs/lint.yaml
+  - .ci/jobs/test.yaml
+  - .ci/jobs/docker.yaml
+  - .ci/jobs/helm.yaml

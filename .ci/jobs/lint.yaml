@@ -1,0 +1,61 @@
+charts-lint:  # TODO must fail if helm vhart version hasnt changed 
+  stage: lint
+  image:
+    name: <harbor>/chart-testing:stable
+    entrypoint: [""]
+  variables:
+    GIT_DEPTH: 0
+  script:
+    - |
+      git config --global --add safe.directory $CI_PROJECT_DIR
+      git fetch origin "$CI_DEFAULT_BRANCH"
+      ct list-changed --config .ci/ct.yaml
+      ct lint --debug --config .ci/ct.yaml || exit 1
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - helm/**/*
+        - .ci/ct.yaml
+    - if: $CI_MERGE_REQUEST_ID
+      changes:
+        - helm/**/*
+        - .ci/ct.yaml
+
+yaml-lint:
+  stage: lint
+  image:
+    name: <harbor>/chart-testing:stable
+    entrypoint: [""]
+  script:
+    - yamllint -c .ci/yamllint.yaml resources.yaml
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - resources.yaml
+    - if: $CI_MERGE_REQUEST_ID
+      changes:
+        - resources.yaml
+
+# go-lint:
+#   stage: lint
+#   image: <harbor>/go-1.24:stable
+#   before_script:
+#     - apk add --no-cache curl git bash
+#     - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v1.55.2
+#   script:
+#     - echo "IMAGE_VERSION=$(date +%Y%m.%d.%s)-hash.$(git rev-parse --short HEAD)"
+#     - echo "Checking gofmt..."
+#     - test -z "$(find . -path ./cache -prune -o -name '*.go' -print | xargs gofmt -l)" || (echo "Code not formatted. Run 'gofmt -w .'"; exit 1)
+#     - echo "Running golangci-lint..."
+#     - golangci-lint run ./... --timeout=3m --skip-dirs=..
+#   rules:
+#     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+#       changes:
+#         - '**/*.go'
+#         - go.mod
+#         - go.sum
+#     - if: $CI_MERGE_REQUEST_ID
+#       changes:
+#         - '**/*.go'
+#         - go.mod
+#         - go.sum
