@@ -1,0 +1,18 @@
+sharepoint:
+  database_table: sharepoint_lists
+  lists:
+    - site_id: 73a218afb8q-wfb22-1csda-8f2gs-asifb38fbs,r837ghfa9-1421-r3fha-3af-a87sgd8sa
+      list_id: 93dda37fh-ae87rga-a0eas-a983h-a37rfah
+      database_table: evaluations_lv
+      columns_map:
+        gp_avg_score: AvgScore
+        gp_nickname: Nickname
+        gp_hrid: HRID
+    - site_id: 93tg9ha-1231-251-a0fsa-fg8w7h8eshr8w,8rtg8ha-3947-w17s-28eahj-e7trfah9ajd
+      list_id: b5ba7ssdf-412d-2412-ad32ed-q24ewqw23
+      database_table: evaluations_lv_test
+      columns_map:
+        gp_avg_score: AvgScore
+        gp_nickname: Nickname
+        gp_hrid: HRID
+        is_attachments: Attachments

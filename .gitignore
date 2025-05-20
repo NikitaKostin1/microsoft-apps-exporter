@@ -1,0 +1,39 @@
+# Build Artifacts
+app
+goose
+/cache/*
+!.gitkeep
+*.tgz
+image_version.txt
+.trivycache
+
+# Test Artifacts
+!/cache/tests
+/cache/tests/*
+
+# pgAdmin Config
+!/cache/.pgadmin
+/cache/.pgadmin/*
+!/cache/.pgadmin/servers.json
+
+# Editor and IDE Files
+.vscode/
+.VSCodeCounter/
+
+# Local Dev and Secrets
+.env*
+!.env*.example
+secrets/
+harbor
+helm/**/secret.yaml
+helm/**/values-minikube.yaml
+helm/db-monkeybot/
+
+# Temporary Files
+*.log
+*.bak
+*.swp
+*~
+
+# Development Directories
+benchmark/

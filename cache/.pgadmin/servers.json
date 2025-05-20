@@ -1,0 +1,26 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "development",
+            "Group": "Servers", 
+            "Host": "postgres",
+            "Port": 5432,
+            "MaintenanceDB": "development",
+            "Username": "user",
+            "Password": "password",
+            "SSLMode": "prefer",
+            "AutoConnect": false
+        },
+        "2": {
+            "Name": "testing",
+            "Group": "Servers",
+            "Host": "postgres",
+            "Port": 5432,
+            "MaintenanceDB": "testing",
+            "Username": "user",
+            "Password": "password",
+            "SSLMode": "prefer",
+            "AutoConnect": false
+        }
+    }
+}
