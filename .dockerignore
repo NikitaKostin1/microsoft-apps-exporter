@@ -1,0 +1,41 @@
+# Build Artifacts
+app
+goose
+/cache/
+
+# Editor and IDE Files
+.vscode/
+.VSCodeCounter/
+
+# Git and CI
+.git
+.gitignore
+.gitlab-ci.yaml
+.ci/
+
+# Development Files
+README.md
+Makefile
+benchmark/
+docker-compose.yaml
+.env
+.env*
+*.secret
+*.key
+
+# Test Directories
+tests/
+
+# Helm Charts
+helm/
+
+# CI Artifacts
+.trivycache/
+trivy-secrets.yaml
+version.yaml
+
+# Temporary Files
+*.log
+*.bak
+*.swp
+*~

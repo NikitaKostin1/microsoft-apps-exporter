@@ -1,0 +1,67 @@
+services:
+
+  microsoft-apps-exporter:
+    container_name: microsoft-apps-exporter
+    image: microsoft-apps-exporter:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: final
+    restart: no
+    ports: 
+      - "${WEBHOOK_LISTEN_PORT}:${WEBHOOK_LISTEN_PORT}"
+    deploy:
+      mode: replicated
+      replicas: 1
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal_network
+
+  postgres:
+    container_name: postgres
+    image: postgres:14.2
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    restart: on-failure
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    deploy:
+      mode: replicated
+      replicas: 1
+    volumes:
+      - ${DB_CACHE_DIR}:/var/lib/postgresql/data/
+    networks:
+      - internal_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $DB_USER -d $DB_NAME"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  pgadmin:
+    container_name: pgadmin4
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin@mail.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - 8082:80
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./cache/.pgadmin/servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      - postgres
+    networks:
+      - internal_network
+
+networks:
+  internal_network:
+    name: network
+    driver: bridge
+
+volumes:
+  pgadmin_data:
